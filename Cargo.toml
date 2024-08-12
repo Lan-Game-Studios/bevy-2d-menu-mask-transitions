@@ -1,0 +1,32 @@
+[package]
+name = "bevy_2d_menu_mask_transition"
+description = "A Bevy plugin for creating smooth menu transitions with customizable masks."
+license = "MIT"
+version = "0.1.0"
+edition = "2021"
+repository = "https://github.com/yourusername/bevy_2d_menu_mask_transition"
+homepage = "https://github.com/yourusername/bevy_2d_menu_mask_transition"
+documentation = "https://docs.rs/bevy_2d_menu_mask_transition"
+readme = "README.md"
+keywords = ["bevy", "plugin", "menu", "transitions", "shader", "rust", "game development"]
+categories = ["game-engines", "graphics", "rendering"]
+
+[dependencies]
+bevy_render = "0.14"
+bevy_ecs = "0.14"
+bevy_app = "0.14"
+bevy_asset = "0.14"
+bevy_time = "0.14"
+bevy_ui = "0.14"
+bevy_reflect = "0.14"
+bevy_window = "0.14"
+bevy_state = "0.14"
+bevy_utils = "0.14"
+bevy_hierarchy = "0.14"
+bevy_log = "0.14"
+
+[dev-dependencies]
+bevy = { version = "0.14", features = ["webp"] }
+
+[workspace.lints.clippy]
+type_complexity = "allow"
