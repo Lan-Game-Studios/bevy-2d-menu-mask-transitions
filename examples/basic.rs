@@ -13,13 +13,14 @@ enum MyState {
 #[derive(Component, Default)]
 struct Marker;
 
+/// used to make transitions
 #[derive(Component, Default)]
 struct Navigate(MyState);
 
 fn main() {
     App::new()
-        .init_state::<MyState>()
         .add_plugins((DefaultPlugins, MenuTransitionPlugin::<MyState>::default()))
+        .init_state::<MyState>()
         .add_systems(Startup, setup)
         .add_systems(
             Update,
