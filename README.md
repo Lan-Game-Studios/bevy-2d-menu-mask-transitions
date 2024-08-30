@@ -2,11 +2,11 @@
 
 ## TODOs
 
-- [ ] Cleanup README
-    - [ ] add compatibility table
-    - [ ] cleanup usage section
-    - [ ] add gif of nice menu transition
+- [ ] add compatibility table
+- [ ] cleanup README usage section
 - [ ] fix first time loading bug
+
+![](https://github.com/Lan-Game-Studios/bevy-2d-menu-mask-transitions/blob/main/docs/example-basic.gif)
 
 ## Overview
 
@@ -81,12 +81,6 @@ cargo add bevy_2d_menu_mask_transition
    }
    ```
 
-### Example
-
-**example/basic.rs**
-
-![](https://github.com/Lan-Game-Studios/bevy-2d-menu-mask-transitions/blob/main/docs/example-basic.gif)
-
 ### Contribution
 
 If you'd like to contribute to this plugin, feel free to submit issues or pull requests on the GitHub repository.
@@ -101,3 +95,9 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE.md) fi
 - The Bevy community for providing a robust and flexible game development framework.
 
 
+## Compatibility
+
+
+| Version | Bevy Version |
+|---------|--------------|
+| 0.1.0   | 0.14         |
