@@ -85,7 +85,7 @@ cargo add bevy_2d_menu_mask_transition
 
 **example/basic.rs**
 
-// TODO add gif
+![](https://github.com/)
 
 ### Contribution
 
