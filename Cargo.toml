@@ -8,8 +8,17 @@ repository = "https://github.com/yourusername/bevy_2d_menu_mask_transition"
 homepage = "https://github.com/yourusername/bevy_2d_menu_mask_transition"
 documentation = "https://docs.rs/bevy_2d_menu_mask_transition"
 readme = "README.md"
-keywords = ["bevy", "plugin", "menu", "transitions", "shader", "rust", "game development"]
+keywords = [
+    "bevy",
+    "plugin",
+    "menu",
+    "transitions",
+    "shader",
+    "rust",
+    "game development",
+]
 categories = ["game-engines", "graphics", "rendering"]
+exclude = ["assets/*", "docs/*"]
 
 [dependencies]
 bevy_render = "0.14"
