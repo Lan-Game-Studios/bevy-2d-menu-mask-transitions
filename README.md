@@ -85,7 +85,7 @@ cargo add bevy_2d_menu_mask_transition
 
 **example/basic.rs**
 
-![](https://github.com/)
+![](https://github.com/Lan-Game-Studios/bevy-2d-menu-mask-transitions/blob/main/docs/example-basic.gif)
 
 ### Contribution
 
