@@ -230,7 +230,10 @@ fn wait_for_assets<T: Transitionalbe>(
                 prepare_menu_shader.duration,
                 TimerMode::Once,
             )));
-            debug!("Added `Despawn` to {:?}", entity);
+            debug!(
+                "Added `Despawn` to {:?} with duration {:?}",
+                entity, prepare_menu_shader.duration
+            );
         }
         commands.remove_resource::<PrepareMenuShader<T>>();
         next_state.set(prepare_menu_shader.target_state.clone());
@@ -246,10 +249,14 @@ fn despawn(
     time: Res<Time>,
     mut query: Query<(Entity, &mut Despawn)>,
     mut commands: Commands,
-
     mut next_transition_state: ResMut<NextState<TransitionState>>,
 ) {
     for (entity, mut despawn) in query.iter_mut() {
+        debug!(
+            "Waiting to despawn delta {:?} remaing {:?}",
+            time.delta(),
+            despawn.0.remaining()
+        );
         if despawn.0.tick(time.delta()).finished() {
             commands.entity(entity).despawn_recursive();
             next_transition_state.set(TransitionState::Idle);

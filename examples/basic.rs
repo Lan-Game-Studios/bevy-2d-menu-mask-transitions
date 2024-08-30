@@ -2,6 +2,7 @@ use std::time::Duration;
 
 use bevy::{color::palettes::tailwind, prelude::*};
 use bevy_2d_menu_mask_transition::{MenuTransitionPlugin, TriggerMenuTransition};
+use bevy_log::{Level, LogPlugin};
 
 const MASKS: [&str; 8] = [
     "gradient001.webp",
@@ -43,7 +44,13 @@ impl Default for CurrentTransitionMask {
 
 fn main() {
     App::new()
-        .add_plugins((DefaultPlugins, MenuTransitionPlugin::<MyState>::default()))
+        .add_plugins((
+            DefaultPlugins.set(LogPlugin {
+                level: Level::DEBUG,
+                ..default()
+            }),
+            MenuTransitionPlugin::<MyState>::default(),
+        ))
         .init_state::<MyState>()
         .init_resource::<CurrentTransitionMask>()
         .add_systems(Startup, setup)

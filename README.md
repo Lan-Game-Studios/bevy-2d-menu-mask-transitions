@@ -6,7 +6,7 @@
 - [ ] cleanup README usage section
 - [ ] fix first time loading bug
 
-![](https://github.com/Lan-Game-Studios/bevy-2d-menu-mask-transitions/blob/main/docs/example-basic.gif)
+![](https://github.com/Lan-Game-Studios/bevy-2d-menu-mask-transitions/blob/main/docs/example-basic-long.gif)
 
 ## Overview
 
