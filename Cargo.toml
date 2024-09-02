@@ -2,7 +2,7 @@
 name = "bevy_2d_menu_mask_transition"
 description = "A Bevy plugin for creating smooth menu transitions with customizable masks."
 license = "MIT"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 repository = "https://github.com/Lan-Game-Studios/bevy-2d-menu-mask-transitions"
 homepage = "https://github.com/Lan-Game-Studios/bevy-2d-menu-mask-transitions"
