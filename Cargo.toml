@@ -11,10 +11,8 @@ readme = "README.md"
 keywords = [
     "bevy",
     "plugin",
-    "menu",
+    "2d",
     "transitions",
-    "shader",
-    "rust",
     "game development",
 ]
 categories = ["game-engines", "graphics", "rendering"]
