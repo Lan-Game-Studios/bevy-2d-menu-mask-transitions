@@ -6,7 +6,7 @@ use std::{
     time::Duration,
 };
 
-use bevy_app::{App, Plugin, PreUpdate, Update};
+use bevy_app::{App, Last, Plugin, Update};
 use bevy_asset::{embedded_asset, Asset, AssetServer, Assets, Handle, LoadState};
 use bevy_ecs::{
     component::Component,
@@ -69,7 +69,7 @@ impl<T: Transitionalbe> Plugin for MenuTransitionPlugin<T> {
             .add_event::<TriggerMenuTransition<T>>()
             .add_systems(Update, despawn)
             .add_systems(
-                PreUpdate,
+                Last,
                 (
                     idle::<T>.run_if(in_state(TransitionState::Idle)),
                     create_material::<T>.run_if(in_state(TransitionState::TakingScreenshot)),

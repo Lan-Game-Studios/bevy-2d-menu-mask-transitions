@@ -3,6 +3,7 @@
 ## TODOs
 
 - [ ] fix first time loading bug
+- [ ] reduce texture overhead by using single channel textures instead of RGBA channels
 
 ![](https://github.com/Lan-Game-Studios/bevy-2d-menu-mask-transitions/blob/main/docs/example-basic-long.gif)
 
