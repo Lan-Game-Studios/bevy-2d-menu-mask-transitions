@@ -2,8 +2,6 @@
 
 ## TODOs
 
-- [ ] add compatibility table
-- [ ] cleanup README usage section
 - [ ] fix first time loading bug
 
 ![](https://github.com/Lan-Game-Studios/bevy-2d-menu-mask-transitions/blob/main/docs/example-basic-long.gif)
@@ -15,7 +13,7 @@ This project is a Bevy plugin that enables smooth menu transitions in Bevy appli
 ## Features
 
 - **State-based Transitions:** Supports transitions between different states in your Bevy application, such as `Menu` and `InGame`.
-- **Customizable Transition Effects:** Allows the use of custom shaders and masks to define the visual appearance of transitions.
+- **Customizable Transition Effects:** Allows the use of custom masks to define the visual appearance of transitions.
 - **Integration with Bevy's UI System:** The plugin integrates smoothly with Bevy's UI system, enabling the creation of UI elements that interact with the transition effects.
 
 ## Installation
@@ -100,4 +98,10 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE.md) fi
 
 | Version | Bevy Version |
 |---------|--------------|
-| 0.1.0   | 0.14         |
+| 0.1.x   | 0.14         |
+
+## Lan Game Studios
+
+This crate is part of an effort to crate a game studio. Checkout 
+[Mega Giga Cookie Destoryer TD](https://store.steampowered.com/app/2283070/Mega_Giga_Cookie_Destroyer_TD/) or
+the mission of [Lan Game Studios](https://langamestudios.com) if you like games or game development.
