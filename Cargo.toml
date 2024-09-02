@@ -13,7 +13,7 @@ keywords = [
     "plugin",
     "2d",
     "transitions",
-    "game development",
+    "menu",
 ]
 categories = ["game-engines", "graphics", "rendering"]
 exclude = ["assets/*", "docs/*"]
