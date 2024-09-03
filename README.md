@@ -1,11 +1,20 @@
 # Bevy Menu Transitions Plugin
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![Doc](https://docs.rs/bevy-2d-menu-mask-transitions/badge.svg)](https://docs.rs/bevy-2d-menu-mask-transitions)
+[![Crate](https://img.shields.io/crates/v/bevy-2d-menu-mask-transitions.svg)](https://crates.io/crates/bevy-2d-menu-mask-transitions)
+[![Build Status](https://github.com/Lan-Game-Studios/bevy-2d-menu-mask-transitions/actions/workflows/rust.yml/badge.svg)](https://github.com/Lan-Game-Studios/bevy-2d-menu-mask-transitions/actions/workflows/rust.yml)
+[![Bevy tracking](https://img.shields.io/badge/Bevy%20tracking-v0.14-lightblue)](https://github.com/bevyengine/bevy/blob/main/docs/plugins_guidelines.md#main-branch-tracking)
+[![dependency status](https://deps.rs/repo/github/Lan-Game-Studios/bevy-2d-menu-mask-transitions/status.svg)](https://deps.rs/repo/github/Lan-Game-Studios/bevy-2d-menu-mask-transitions)
+
+![](https://github.com/Lan-Game-Studios/bevy-2d-menu-mask-transitions/blob/main/docs/example-basic-long.gif)
+
+[![Discord](https://assets-global.website-files.com/6257adef93867e50d84d30e2/636e0b5061df29d55a92d945_full_logo_blurple_RGB.svg)](https://discord.gg/JN5c3vrp) 
+
 ## TODOs
 
 - [ ] fix first time loading bug
 - [ ] reduce texture overhead by using single channel textures instead of RGBA channels
-
-![](https://github.com/Lan-Game-Studios/bevy-2d-menu-mask-transitions/blob/main/docs/example-basic-long.gif)
 
 ## Overview
 
