@@ -1,8 +1,8 @@
 # Bevy Menu Transitions Plugin
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Doc](https://docs.rs/bevy-2d-menu-mask-transitions/badge.svg)](https://docs.rs/bevy-2d-menu-mask-transitions)
-[![Crate](https://img.shields.io/crates/v/bevy-2d-menu-mask-transitions.svg)](https://crates.io/crates/bevy-2d-menu-mask-transitions)
+[![Doc](https://docs.rs/bevy-2d-menu-mask-transition/badge.svg)](https://docs.rs/bevy-2d-menu-mask-transition)
+[![Crate](https://img.shields.io/crates/v/bevy-2d-menu-mask-transition.svg)](https://crates.io/crates/bevy-2d-menu-mask-transition)
 [![Build Status](https://github.com/Lan-Game-Studios/bevy-2d-menu-mask-transitions/actions/workflows/rust.yml/badge.svg)](https://github.com/Lan-Game-Studios/bevy-2d-menu-mask-transitions/actions/workflows/rust.yml)
 [![Bevy tracking](https://img.shields.io/badge/Bevy%20tracking-v0.14-lightblue)](https://github.com/bevyengine/bevy/blob/main/docs/plugins_guidelines.md#main-branch-tracking)
 [![dependency status](https://deps.rs/repo/github/Lan-Game-Studios/bevy-2d-menu-mask-transitions/status.svg)](https://deps.rs/repo/github/Lan-Game-Studios/bevy-2d-menu-mask-transitions)
