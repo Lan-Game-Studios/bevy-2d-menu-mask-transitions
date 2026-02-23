@@ -6,36 +6,25 @@ use std::{
     time::Duration,
 };
 
-use bevy_app::{App, Last, Plugin, Update};
-use bevy_asset::{embedded_asset, Asset, AssetServer, Assets, Handle, LoadState};
-use bevy_ecs::{
-    component::Component,
-    entity::Entity,
-    event::{Event, EventReader},
-    query::With,
-    schedule::IntoSystemConfigs,
-    system::Resource,
-    system::{Commands, Query, Res, ResMut},
-};
-use bevy_hierarchy::prelude::DespawnRecursiveExt;
+use bevy_app::{App, Last, Plugin};
+use bevy_asset::{embedded_asset, Asset, AssetServer, Assets, Handle};
+use bevy_ecs::prelude::*;
+use bevy_image::Image;
 use bevy_log::prelude::debug;
 use bevy_reflect::TypePath;
 use bevy_render::{
-    render_resource::{AsBindGroup, ShaderRef},
-    texture::Image,
-    view::screenshot::ScreenshotManager,
+    render_resource::AsBindGroup,
+    view::screenshot::{Screenshot, ScreenshotCaptured},
 };
+use bevy_shader::ShaderRef;
 use bevy_state::{
-    app::AppExtStates,
+    app::{AppExtStates, StatesPlugin},
     prelude::in_state,
     state::{FreelyMutableState, NextState, States},
 };
 use bevy_time::{Time, Timer, TimerMode};
-use bevy_ui::{
-    node_bundles::MaterialNodeBundle, FocusPolicy, PositionType, Style, UiMaterial,
-    UiMaterialPlugin, Val, ZIndex,
-};
-use bevy_utils::default;
+use bevy_ui::{FocusPolicy, Node, PositionType, Val, ZIndex};
+use bevy_ui_render::prelude::{MaterialNode, UiMaterial, UiMaterialPlugin};
 use bevy_window::PrimaryWindow;
 
 pub trait Transitionalbe:
@@ -50,7 +39,7 @@ impl<T> Transitionalbe for T where
 /// transition to a new game state with a transition effect
 /// a screenshot of the state before will be taken and applied
 /// with a filter mask
-#[derive(Event)]
+#[derive(Message)]
 pub struct TriggerMenuTransition<T: Transitionalbe> {
     pub target_state: T,
     pub duration: Duration,
@@ -64,10 +53,13 @@ pub struct TriggerMenuTransition<T: Transitionalbe> {
 pub struct MenuTransitionPlugin<T: Transitionalbe>(PhantomData<T>);
 impl<T: Transitionalbe> Plugin for MenuTransitionPlugin<T> {
     fn build(&self, app: &mut App) {
+        if !app.is_plugin_added::<StatesPlugin>() {
+            app.add_plugins(StatesPlugin);
+        }
+
         app.add_plugins(UiMaterialPlugin::<MenuTransitionMaterial>::default())
             .init_state::<TransitionState>()
-            .add_event::<TriggerMenuTransition<T>>()
-            .add_systems(Update, despawn)
+            .add_message::<TriggerMenuTransition<T>>()
             .add_systems(
                 Last,
                 (
@@ -127,7 +119,7 @@ impl MenuTransitionMaterial {
         Self {
             mask,
             previous_image,
-            startup: time.elapsed_seconds_wrapped(),
+            startup: time.elapsed_secs_wrapped(),
             duration: duration.as_secs_f32(),
         }
     }
@@ -142,16 +134,15 @@ impl UiMaterial for MenuTransitionMaterial {
 /// create a texture from the current frame and
 /// store it for the shader to transition
 fn idle<T: Transitionalbe>(
-    mut reader: EventReader<TriggerMenuTransition<T>>,
+    mut reader: MessageReader<TriggerMenuTransition<T>>,
     windows: Query<Entity, With<PrimaryWindow>>,
     mut commands: Commands,
-    mut screenshot_manager: ResMut<ScreenshotManager>,
     mut next_transition_state: ResMut<NextState<TransitionState>>,
 ) {
     let Some(event) = reader.read().next() else {
         return;
     };
-    let Ok(window) = windows.get_single() else {
+    let Ok(window) = windows.single() else {
         return;
     };
 
@@ -165,10 +156,12 @@ fn idle<T: Transitionalbe>(
         mask: event.mask.clone(),
         screenshot: None,
     };
-    let _ = screenshot_manager.take_screenshot(window, move |image| {
-        let mut i = image_arc.lock().unwrap();
-        *i = Some(image);
-    });
+    commands.spawn(Screenshot::window(window)).observe(
+        move |screenshot_captured: On<ScreenshotCaptured>| {
+            let mut i = image_arc.lock().unwrap();
+            *i = Some(screenshot_captured.image.clone());
+        },
+    );
     commands.insert_resource(prepare);
     next_transition_state.set(TransitionState::TakingScreenshot);
 }
@@ -196,18 +189,17 @@ fn create_material<T: Transitionalbe>(
     );
     let ui_material = menu_transition_materials.add(material);
 
-    commands.spawn((MaterialNodeBundle {
-        z_index: ZIndex::Global(i32::MAX),
-        focus_policy: FocusPolicy::Block,
-        style: Style {
+    commands.spawn((
+        MaterialNode(ui_material),
+        ZIndex(i32::MAX),
+        FocusPolicy::Block,
+        Node {
             position_type: PositionType::Absolute,
-            height: Val::Vh(100.),
-            width: Val::Vw(100.),
-            ..default()
+            height: Val::Percent(100.),
+            width: Val::Percent(100.),
+            ..Default::default()
         },
-        material: ui_material,
-        ..default()
-    },));
+    ));
 
     prepare_menu_shader.screenshot = Some(screenshot_handle);
     next_transition_state.set(TransitionState::LoadingMaskAndScreenshot);
@@ -217,14 +209,14 @@ fn wait_for_assets<T: Transitionalbe>(
     mut commands: Commands,
     prepare_menu_shader: Res<PrepareMenuShader<T>>,
     mut next_state: ResMut<NextState<T>>,
-    query: Query<Entity, With<Handle<MenuTransitionMaterial>>>,
+    query: Query<Entity, With<MaterialNode<MenuTransitionMaterial>>>,
     mut next_transition_state: ResMut<NextState<TransitionState>>,
     asset_server: Res<AssetServer>,
 ) {
-    let mask_load_state = asset_server.load_state(&prepare_menu_shader.mask);
-    debug!("Loaded Mask {:?}", mask_load_state);
+    let is_mask_loaded = asset_server.is_loaded_with_dependencies(prepare_menu_shader.mask.id());
+    debug!("Loaded Mask {:?}", is_mask_loaded);
 
-    if mask_load_state == LoadState::Loaded {
+    if is_mask_loaded {
         for entity in query.iter() {
             commands.entity(entity).insert(Despawn(Timer::new(
                 prepare_menu_shader.duration,
@@ -257,8 +249,8 @@ fn despawn(
             time.delta(),
             despawn.0.remaining()
         );
-        if despawn.0.tick(time.delta()).finished() {
-            commands.entity(entity).despawn_recursive();
+        if despawn.0.tick(time.delta()).is_finished() {
+            commands.entity(entity).despawn();
             next_transition_state.set(TransitionState::Idle);
             debug!("Despawn MenuTransitionMaterial");
         }

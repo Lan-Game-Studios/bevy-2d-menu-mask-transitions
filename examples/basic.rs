@@ -2,7 +2,10 @@ use std::time::Duration;
 
 use bevy::{color::palettes::tailwind, prelude::*};
 use bevy_2d_menu_mask_transition::{MenuTransitionPlugin, TriggerMenuTransition};
-use bevy_log::{Level, LogPlugin};
+use bevy_state::{
+    app::AppExtStates,
+    prelude::{State, States, state_changed},
+};
 
 const MASKS: [&str; 8] = [
     "gradient001.webp",
@@ -23,10 +26,6 @@ enum MyState {
 }
 
 #[derive(Component, Default)]
-struct Marker;
-
-/// used to make transitions
-#[derive(Component, Default)]
 struct Navigate(MyState);
 
 /// used to choose mask
@@ -44,139 +43,111 @@ impl Default for CurrentTransitionMask {
 
 fn main() {
     App::new()
-        .add_plugins((
-            DefaultPlugins.set(LogPlugin {
-                level: Level::DEBUG,
-                ..default()
-            }),
-            MenuTransitionPlugin::<MyState>::default(),
-        ))
+        .add_plugins((DefaultPlugins, MenuTransitionPlugin::<MyState>::default()))
+        .insert_resource(ClearColor(tailwind::STONE_950.into()))
         .init_state::<MyState>()
         .init_resource::<CurrentTransitionMask>()
         .add_systems(Startup, setup)
         .add_systems(
             Update,
             (
-                interacte_mask,
-                interacte_navigate,
+                interact_mask,
+                interact_navigate,
                 update_background.run_if(state_changed::<MyState>),
             ),
         )
         .run();
 }
 
-fn setup(
-    mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut material: ResMut<Assets<ColorMaterial>>,
-) {
-    let text_style = TextStyle {
-        font_size: 58.0,
-        ..default()
-    };
-    let button_style = Style {
-        padding: UiRect::axes(Val::Px(45.0), Val::Px(30.0)),
-        ..default()
-    };
-    commands.spawn(Camera2dBundle::default());
-    commands.spawn(ColorMesh2dBundle {
-        mesh: meshes.add(Circle::new(200.0)).into(),
-        material: material.add(ColorMaterial::from_color(tailwind::BLUE_400)),
-        ..default()
-    });
-    commands.spawn((
-        ColorMesh2dBundle {
-            mesh: meshes.add(Circle::new(20_000.0)).into(),
-            material: material.add(ColorMaterial::from_color(tailwind::VIOLET_500)),
-            transform: Transform::from_xyz(0.0, 0.0, -1.0),
-            ..default()
-        },
-        Marker,
-    ));
+fn setup(mut commands: Commands) {
+    commands.spawn(Camera2d);
+
     commands
-        .spawn(NodeBundle {
-            style: Style {
-                display: Display::Grid,
-                grid_template_rows: vec![GridTrack::min_content()],
-                grid_template_columns: vec![GridTrack::max_content(), GridTrack::max_content()],
-                position_type: PositionType::Absolute,
-                min_width: Val::Percent(100.0),
-                min_height: Val::Percent(100.0),
+        .spawn((
+            Node {
+                width: Val::Percent(100.0),
+                height: Val::Percent(100.0),
                 justify_content: JustifyContent::Center,
                 align_items: AlignItems::Center,
-                align_content: AlignContent::Center,
-                column_gap: Val::Px(50.0),
+                column_gap: Val::Px(40.0),
                 ..default()
             },
-            ..default()
-        })
+            BackgroundColor(Color::NONE),
+        ))
         .with_children(|wrapper| {
-            wrapper
-                .spawn((
-                    ButtonBundle {
-                        style: button_style.clone(),
-                        ..default()
-                    },
-                    Navigate(MyState::Menu),
-                ))
-                .with_children(|button| {
-                    button.spawn(TextBundle::from_section("Go to Menu", text_style.clone()));
-                });
-            wrapper
-                .spawn((
-                    ButtonBundle {
-                        style: button_style.clone(),
-                        ..default()
-                    },
-                    Navigate(MyState::InGame),
-                ))
-                .with_children(|button| {
-                    button.spawn(TextBundle::from_section("Go to Game", text_style.clone()));
-                });
+            spawn_nav_button(wrapper, "Go to Menu", MyState::Menu);
+            spawn_nav_button(wrapper, "Go to Game", MyState::InGame);
         });
-    let small_text_style = TextStyle {
-        font_size: 18.0,
-        ..default()
-    };
-    let small_button_style = Style {
-        padding: UiRect::axes(Val::Px(15.0), Val::Px(10.0)),
-        width: Val::Px(270.0),
-        ..default()
-    };
+
     commands
-        .spawn(NodeBundle {
-            style: Style {
-                flex_direction: FlexDirection::RowReverse,
+        .spawn((
+            Node {
                 position_type: PositionType::Absolute,
-                min_width: Val::Percent(100.0),
-                min_height: Val::Percent(100.0),
-                justify_content: JustifyContent::Center,
-                align_items: AlignItems::Center,
-                align_content: AlignContent::End,
+                left: Val::Px(24.0),
+                right: Val::Px(24.0),
+                bottom: Val::Px(24.0),
                 flex_wrap: FlexWrap::Wrap,
-                column_gap: Val::Px(50.0),
+                column_gap: Val::Px(12.0),
+                row_gap: Val::Px(12.0),
+                justify_content: JustifyContent::Center,
                 ..default()
             },
-            ..default()
-        })
+            BackgroundColor(Color::NONE),
+        ))
         .with_children(|wrapper| {
-            for path in MASKS.iter() {
+            for path in MASKS {
                 wrapper
                     .spawn((
-                        ButtonBundle {
-                            style: small_button_style.clone(),
+                        Button,
+                        Node {
+                            padding: UiRect::axes(Val::Px(12.0), Val::Px(8.0)),
+                            border: UiRect::all(Val::Px(2.0)),
                             ..default()
                         },
+                        BorderColor::all(Color::WHITE),
+                        BackgroundColor(tailwind::STONE_700.into()),
                         Mask(path.to_string()),
                     ))
                     .with_children(|button| {
-                        button.spawn(TextBundle::from_section(*path, small_text_style.clone()));
+                        button.spawn((
+                            Text::new(path),
+                            TextFont {
+                                font_size: 16.0,
+                                ..default()
+                            },
+                            TextColor(Color::WHITE),
+                        ));
                     });
             }
         });
 }
 
-fn interacte_navigate(
+fn spawn_nav_button(parent: &mut ChildSpawnerCommands, label: &str, state: MyState) {
+    parent
+        .spawn((
+            Button,
+            Node {
+                padding: UiRect::axes(Val::Px(45.0), Val::Px(30.0)),
+                border: UiRect::all(Val::Px(2.0)),
+                ..default()
+            },
+            BorderColor::all(Color::WHITE),
+            BackgroundColor(tailwind::STONE_700.into()),
+            Navigate(state),
+        ))
+        .with_children(|button| {
+            button.spawn((
+                Text::new(label),
+                TextFont {
+                    font_size: 42.0,
+                    ..default()
+                },
+                TextColor(Color::WHITE),
+            ));
+        });
+}
+
+fn interact_navigate(
     mut query: Query<
         (
             &Navigate,
@@ -187,14 +158,14 @@ fn interacte_navigate(
         With<Button>,
     >,
     my_state: Res<State<MyState>>,
-    mut writer: EventWriter<TriggerMenuTransition<MyState>>,
+    mut writer: MessageWriter<TriggerMenuTransition<MyState>>,
     asset_server: Res<AssetServer>,
     current_transition_mask: Res<CurrentTransitionMask>,
 ) {
     for (navigate, interaction, mut background_color, mut visibility) in query.iter_mut() {
         match (*interaction, navigate) {
             (Interaction::Pressed, navigate) => {
-                writer.send(TriggerMenuTransition {
+                writer.write(TriggerMenuTransition {
                     target_state: navigate.0,
                     duration: Duration::from_secs_f32(1.0),
                     mask: asset_server.load(&current_transition_mask.0),
@@ -212,7 +183,7 @@ fn interacte_navigate(
     }
 }
 
-fn interacte_mask(
+fn interact_mask(
     mut query: Query<(&Mask, &Interaction, &mut BackgroundColor), With<Button>>,
     mut current_transition_mask: ResMut<CurrentTransitionMask>,
 ) {
@@ -231,14 +202,9 @@ fn interacte_mask(
     }
 }
 
-fn update_background(
-    my_state: Res<State<MyState>>,
-    mut query: Query<&mut Visibility, With<Marker>>,
-) {
-    for mut visibility in query.iter_mut() {
-        *visibility = match my_state.get() {
-            MyState::Menu => Visibility::Hidden,
-            MyState::InGame => Visibility::Visible,
-        }
-    }
+fn update_background(my_state: Res<State<MyState>>, mut clear_color: ResMut<ClearColor>) {
+    clear_color.0 = match my_state.get() {
+        MyState::Menu => tailwind::STONE_950.into(),
+        MyState::InGame => tailwind::VIOLET_500.into(),
+    };
 }

@@ -2,8 +2,8 @@
 name = "bevy_2d_menu_mask_transition"
 description = "A Bevy plugin for creating smooth menu transitions with customizable masks."
 license = "MIT"
-version = "0.1.1"
-edition = "2021"
+version = "0.2.0"
+edition = "2024"
 repository = "https://github.com/Lan-Game-Studios/bevy-2d-menu-mask-transitions"
 homepage = "https://github.com/Lan-Game-Studios/bevy-2d-menu-mask-transitions"
 documentation = "https://docs.rs/bevy_2d_menu_mask_transition"
@@ -28,21 +28,34 @@ opt-level = 1
 opt-level = 3
 
 [dependencies]
-bevy_render = "0.14"
-bevy_ecs = "0.14"
-bevy_app = "0.14"
-bevy_asset = "0.14"
-bevy_time = "0.14"
-bevy_ui = "0.14"
-bevy_reflect = "0.14"
-bevy_window = "0.14"
-bevy_state = "0.14"
-bevy_utils = "0.14"
-bevy_hierarchy = "0.14"
-bevy_log = "0.14"
+bevy_render = "0.18"
+bevy_ecs = "0.18"
+bevy_app = "0.18"
+bevy_asset = "0.18"
+bevy_time = "0.18"
+bevy_ui = "0.18"
+bevy_ui_render = "0.18"
+bevy_reflect = "0.18"
+bevy_window = "0.18"
+bevy_state = "0.18"
+bevy_image = "0.18"
+bevy_shader = "0.18"
+bevy_log = "0.18"
 
 [dev-dependencies]
-bevy = { version = "0.14", features = ["webp"] }
+bevy = { version = "0.18", default-features = false, features = [
+    "bevy_asset",
+    "bevy_core_pipeline",
+    "bevy_render",
+    "bevy_sprite",
+    "bevy_text",
+    "bevy_ui",
+    "bevy_ui_render",
+    "bevy_winit",
+    "default_font",
+    "x11",
+    "webp",
+] }
 
 [workspace.lints.clippy]
 type_complexity = "allow"

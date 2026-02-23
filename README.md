@@ -1,10 +1,10 @@
 # Bevy Menu Transitions Plugin
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Doc](https://docs.rs/bevy-2d-menu-mask-transition/badge.svg)](https://docs.rs/bevy-2d-menu-mask-transition)
-[![Crate](https://img.shields.io/crates/v/bevy-2d-menu-mask-transition.svg)](https://crates.io/crates/bevy-2d-menu-mask-transition)
+[![Doc](https://docs.rs/bevy_2d_menu_mask_transition/badge.svg)](https://docs.rs/bevy_2d_menu_mask_transition)
+[![Crate](https://img.shields.io/crates/v/bevy_2d_menu_mask_transition.svg)](https://crates.io/crates/bevy_2d_menu_mask_transition)
 [![Build Status](https://github.com/Lan-Game-Studios/bevy-2d-menu-mask-transitions/actions/workflows/rust.yml/badge.svg)](https://github.com/Lan-Game-Studios/bevy-2d-menu-mask-transitions/actions/workflows/rust.yml)
-[![Bevy tracking](https://img.shields.io/badge/Bevy%20tracking-v0.14-lightblue)](https://github.com/bevyengine/bevy/blob/main/docs/plugins_guidelines.md#main-branch-tracking)
+[![Bevy tracking](https://img.shields.io/badge/Bevy%20tracking-v0.18-lightblue)](https://github.com/bevyengine/bevy/blob/main/docs/plugins_guidelines.md#main-branch-tracking)
 [![dependency status](https://deps.rs/repo/github/Lan-Game-Studios/bevy-2d-menu-mask-transitions/status.svg)](https://deps.rs/repo/github/Lan-Game-Studios/bevy-2d-menu-mask-transitions)
 
 ![](https://github.com/Lan-Game-Studios/bevy-2d-menu-mask-transitions/blob/main/docs/example-basic-long.gif)
@@ -45,9 +45,10 @@ cargo add bevy_2d_menu_mask_transition
 
    fn main() {
        App::new()
-           .add_plugins(DefaultPlugins)
-           .add_plugin(MenuTransitionPlugin::<YourState>::default())
-           .run();
+            .add_plugins(DefaultPlugins)
+            .add_plugins(MenuTransitionPlugin::<YourState>::default())
+            .init_state::<YourState>()
+            .run();
    }
    ```
 
@@ -66,7 +67,7 @@ cargo add bevy_2d_menu_mask_transition
    ```
 
 3. **Trigger Transitions:**
-   You can trigger transitions between states using the `TriggerMenuTransition` event. For example, this can be tied to a button press:
+   You can trigger transitions between states using the `TriggerMenuTransition` message. In Bevy 0.18 this uses the message API (`MessageWriter`) rather than events. For example, this can be tied to a button press:
 
    ```rust
    #[derive(Component, Default)]
@@ -74,12 +75,12 @@ cargo add bevy_2d_menu_mask_transition
 
    fn interact(
        mut query: Query<(&Interaction, &Navigate), With<Button>>,
-       mut writer: EventWriter<TriggerMenuTransition<YourState>>,
+       mut writer: MessageWriter<TriggerMenuTransition<YourState>>,
        asset_server: Res<AssetServer>,
    ) {
        for (interaction, navigate) in query.iter_mut() {
            if *interaction == Interaction::Pressed {
-               writer.send(TriggerMenuTransition {
+               writer.write(TriggerMenuTransition {
                    target_state: navigate.0,
                    duration: Duration::from_secs_f32(1.0),
                    mask: asset_server.load("path/to/mask.png"),
@@ -108,10 +109,17 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE.md) fi
 
 | Version | Bevy Version |
 |---------|--------------|
-| 0.1.x   | 0.14         |
+| 0.2.x   | 0.18         |
+
+### Bevy 0.18 Notes
+
+- This crate targets Bevy 0.18 APIs.
+- Transition requests are sent with `MessageWriter<TriggerMenuTransition<_>>`.
+- Your app state must be initialized with `.init_state::<YourState>()`.
+- The plugin now ensures Bevy's `StatesPlugin` exists before initializing its internal transition state.
 
 ## Lan Game Studios
 
-This crate is part of an effort to crate a game studio. Checkout 
+This crate is part of an effort to create a game studio. Check out
 [Mega Giga Cookie Destoryer TD](https://store.steampowered.com/app/2283070/Mega_Giga_Cookie_Destroyer_TD/) or
 the mission of [Lan Game Studios](https://langamestudios.com) if you like games or game development.
