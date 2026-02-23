@@ -7,7 +7,7 @@ use std::{
 };
 
 use bevy_app::{App, Last, Plugin};
-use bevy_asset::{embedded_asset, Asset, AssetServer, Assets, Handle};
+use bevy_asset::{Asset, AssetServer, Assets, Handle, embedded_asset};
 use bevy_ecs::prelude::*;
 use bevy_image::Image;
 use bevy_log::prelude::debug;
@@ -26,6 +26,13 @@ use bevy_time::{Time, Timer, TimerMode};
 use bevy_ui::{FocusPolicy, Node, PositionType, Val, ZIndex};
 use bevy_ui_render::prelude::{MaterialNode, UiMaterial, UiMaterialPlugin};
 use bevy_window::PrimaryWindow;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum MaskStretchMode {
+    #[default]
+    PreserveAspect,
+    Stretch,
+}
 
 pub trait Transitionalbe:
     States + PartialEq + Eq + Clone + Hash + FreelyMutableState + Debug
@@ -49,27 +56,55 @@ pub struct TriggerMenuTransition<T: Transitionalbe> {
     pub mask: Handle<Image>,
 }
 
-#[derive(Default)]
-pub struct MenuTransitionPlugin<T: Transitionalbe>(PhantomData<T>);
+pub struct MenuTransitionPlugin<T: Transitionalbe> {
+    mask_stretch_mode: MaskStretchMode,
+    marker: PhantomData<T>,
+}
+
+#[derive(Resource, Clone, Copy)]
+struct MenuTransitionSettings<T: Transitionalbe> {
+    mask_stretch_mode: MaskStretchMode,
+    marker: PhantomData<T>,
+}
+
+impl<T: Transitionalbe> Default for MenuTransitionPlugin<T> {
+    fn default() -> Self {
+        Self {
+            mask_stretch_mode: MaskStretchMode::PreserveAspect,
+            marker: PhantomData,
+        }
+    }
+}
+
+impl<T: Transitionalbe> MenuTransitionPlugin<T> {
+    pub const fn with_mask_stretch_mode(mut self, mask_stretch_mode: MaskStretchMode) -> Self {
+        self.mask_stretch_mode = mask_stretch_mode;
+        self
+    }
+}
+
 impl<T: Transitionalbe> Plugin for MenuTransitionPlugin<T> {
     fn build(&self, app: &mut App) {
         if !app.is_plugin_added::<StatesPlugin>() {
             app.add_plugins(StatesPlugin);
         }
 
-        app.add_plugins(UiMaterialPlugin::<MenuTransitionMaterial>::default())
-            .init_state::<TransitionState>()
-            .add_message::<TriggerMenuTransition<T>>()
-            .add_systems(
-                Last,
-                (
-                    idle::<T>.run_if(in_state(TransitionState::Idle)),
-                    create_material::<T>.run_if(in_state(TransitionState::TakingScreenshot)),
-                    wait_for_assets::<T>
-                        .run_if(in_state(TransitionState::LoadingMaskAndScreenshot)),
-                    despawn.run_if(in_state(TransitionState::Transitioning)),
-                ),
-            );
+        app.insert_resource(MenuTransitionSettings::<T> {
+            mask_stretch_mode: self.mask_stretch_mode,
+            marker: PhantomData,
+        })
+        .add_plugins(UiMaterialPlugin::<MenuTransitionMaterial>::default())
+        .init_state::<TransitionState>()
+        .add_message::<TriggerMenuTransition<T>>()
+        .add_systems(
+            Last,
+            (
+                idle::<T>.run_if(in_state(TransitionState::Idle)),
+                create_material::<T>.run_if(in_state(TransitionState::TakingScreenshot)),
+                wait_for_assets::<T>.run_if(in_state(TransitionState::LoadingMaskAndScreenshot)),
+                despawn.run_if(in_state(TransitionState::Transitioning)),
+            ),
+        );
         embedded_asset!(app, "transition.wgsl");
     }
 }
@@ -93,6 +128,7 @@ struct PrepareMenuShader<T: Transitionalbe> {
     duration: Duration,
     mask: Handle<Image>,
     screenshot: Option<Handle<Image>>,
+    mask_stretch_mode: MaskStretchMode,
 }
 
 #[derive(Debug, Clone, AsBindGroup, TypePath, Default, Asset)]
@@ -107,6 +143,8 @@ struct MenuTransitionMaterial {
     pub startup: f32,
     #[uniform(5)]
     pub duration: f32,
+    #[uniform(6)]
+    pub preserve_mask_aspect: f32,
 }
 
 impl MenuTransitionMaterial {
@@ -114,6 +152,7 @@ impl MenuTransitionMaterial {
         mask: Handle<Image>,
         previous_image: Handle<Image>,
         duration: Duration,
+        mask_stretch_mode: MaskStretchMode,
         time: &Time,
     ) -> Self {
         Self {
@@ -121,6 +160,10 @@ impl MenuTransitionMaterial {
             previous_image,
             startup: time.elapsed_secs_wrapped(),
             duration: duration.as_secs_f32(),
+            preserve_mask_aspect: match mask_stretch_mode {
+                MaskStretchMode::Stretch => 0.0,
+                MaskStretchMode::PreserveAspect => 1.0,
+            },
         }
     }
 }
@@ -137,6 +180,7 @@ fn idle<T: Transitionalbe>(
     mut reader: MessageReader<TriggerMenuTransition<T>>,
     windows: Query<Entity, With<PrimaryWindow>>,
     mut commands: Commands,
+    settings: Res<MenuTransitionSettings<T>>,
     mut next_transition_state: ResMut<NextState<TransitionState>>,
 ) {
     let Some(event) = reader.read().next() else {
@@ -155,6 +199,7 @@ fn idle<T: Transitionalbe>(
         duration: event.duration,
         mask: event.mask.clone(),
         screenshot: None,
+        mask_stretch_mode: settings.mask_stretch_mode,
     };
     commands.spawn(Screenshot::window(window)).observe(
         move |screenshot_captured: On<ScreenshotCaptured>| {
@@ -185,6 +230,7 @@ fn create_material<T: Transitionalbe>(
         prepare_menu_shader.mask.clone(),
         screenshot_handle.clone(),
         prepare_menu_shader.duration,
+        prepare_menu_shader.mask_stretch_mode,
         &time,
     );
     let ui_material = menu_transition_materials.add(material);

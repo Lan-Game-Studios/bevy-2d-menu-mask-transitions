@@ -267,7 +267,7 @@ dependencies = [
 
 [[package]]
 name = "bevy_2d_menu_mask_transition"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "bevy",
  "bevy_app",

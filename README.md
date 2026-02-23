@@ -52,6 +52,22 @@ cargo add bevy_2d_menu_mask_transition
    }
    ```
 
+   By default, transition masks preserve their aspect ratio using center-crop behavior. To stretch the mask to the full window, configure the plugin with `MaskStretchMode::Stretch`:
+
+   ```rust
+   use bevy::prelude::*;
+   use bevy_2d_menu_mask_transition::{MaskStretchMode, MenuTransitionPlugin};
+
+   App::new()
+       .add_plugins(DefaultPlugins)
+       .add_plugins(
+           MenuTransitionPlugin::<YourState>::default()
+               .with_mask_stretch_mode(MaskStretchMode::Stretch),
+       );
+   ```
+
+   `MaskStretchMode::PreserveAspect` avoids distortion while still covering the full screen.
+
 2. **Define Your Game States:**
    Create an enum to represent the various states in your game:
 
@@ -90,6 +106,12 @@ cargo add bevy_2d_menu_mask_transition
    }
    ```
 
+4. **Try the Preserve Aspect Example:**
+
+   ```shell
+   cargo run --example preserve_aspect
+   ```
+
 ### Contribution
 
 If you'd like to contribute to this plugin, feel free to submit issues or pull requests on the GitHub repository.
@@ -109,6 +131,7 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE.md) fi
 
 | Version | Bevy Version |
 |---------|--------------|
+| 0.3.x   | 0.18         |
 | 0.2.x   | 0.18         |
 
 ### Bevy 0.18 Notes
@@ -117,6 +140,11 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE.md) fi
 - Transition requests are sent with `MessageWriter<TriggerMenuTransition<_>>`.
 - Your app state must be initialized with `.init_state::<YourState>()`.
 - The plugin now ensures Bevy's `StatesPlugin` exists before initializing its internal transition state.
+
+### 0.3.0 Migration Notes
+
+- Default mask sampling changed from stretched UVs to aspect-preserving center-crop.
+- To restore the 0.2.x stretched behavior, set `.with_mask_stretch_mode(MaskStretchMode::Stretch)` on `MenuTransitionPlugin`.
 
 ## Lan Game Studios
 
