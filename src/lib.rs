@@ -92,19 +92,22 @@ impl<T: Transitionalbe> Plugin for MenuTransitionPlugin<T> {
         app.insert_resource(MenuTransitionSettings::<T> {
             mask_stretch_mode: self.mask_stretch_mode,
             marker: PhantomData,
-        })
-        .add_plugins(UiMaterialPlugin::<MenuTransitionMaterial>::default())
-        .init_state::<TransitionState>()
-        .add_message::<TriggerMenuTransition<T>>()
-        .add_systems(
-            Last,
-            (
-                idle::<T>.run_if(in_state(TransitionState::Idle)),
-                create_material::<T>.run_if(in_state(TransitionState::TakingScreenshot)),
-                wait_for_assets::<T>.run_if(in_state(TransitionState::LoadingMaskAndScreenshot)),
-                despawn.run_if(in_state(TransitionState::Transitioning)),
-            ),
-        );
+        });
+        if !app.is_plugin_added::<UiMaterialPlugin<MenuTransitionMaterial>>() {
+            app.add_plugins(UiMaterialPlugin::<MenuTransitionMaterial>::default());
+        }
+        app.init_state::<TransitionState>()
+            .add_message::<TriggerMenuTransition<T>>()
+            .add_systems(
+                Last,
+                (
+                    idle::<T>.run_if(in_state(TransitionState::Idle)),
+                    create_material::<T>.run_if(in_state(TransitionState::TakingScreenshot)),
+                    wait_for_assets::<T>
+                        .run_if(in_state(TransitionState::LoadingMaskAndScreenshot)),
+                    despawn.run_if(in_state(TransitionState::Transitioning)),
+                ),
+            );
         embedded_asset!(app, "transition.wgsl");
     }
 }
